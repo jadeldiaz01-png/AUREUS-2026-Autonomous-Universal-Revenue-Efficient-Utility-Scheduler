@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check src tests
+      - run: mypy src
+      - run: pytest -q --cov=src/aureus --cov-report=term-missing --cov-fail-under=85
+      - name: Fail-closed policy contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('config/aureus-policy.json').read_text())
+          assert p['external_execution_enabled'] is False
+          assert p['financial_execution_enabled'] is False
+          assert p['provider_write_enabled'] is False
+          assert p['owned_or_authorized_compute_only'] is True
+          assert p['cryptojacking'] is False
+          assert p['independent_external_settlement_required'] is True
+          assert p['minimum_positive_settlement_windows_for_production'] >= 3
+          print('AUREUS_POLICY_GATE=PASS')
+          PY

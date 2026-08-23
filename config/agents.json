@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "supervisor": "RevenueSupervisorAgent",
+  "agents": [
+    "GlobalDiscoveryAgent",
+    "WebResearchAgent",
+    "DueDiligenceAgent",
+    "ScamDetectionAgent",
+    "TermsAgent",
+    "GeoEligibilityAgent",
+    "HardwareProfilerAgent",
+    "MarketIntelligenceAgent",
+    "EconomicsAgent",
+    "AllocationAgent",
+    "DynamicPricingAgent",
+    "DeepLearningForecastAgent",
+    "ExperimentationAgent",
+    "ExecutionPlannerAgent",
+    "EvidenceAgent",
+    "RevenueLedgerAgent",
+    "ReconciliationAgent",
+    "RiskAgent",
+    "PolicyAgent",
+    "HumanApprovalAgent"
+  ],
+  "probabilistic_agents_may_authorize_critical_actions": false
+}

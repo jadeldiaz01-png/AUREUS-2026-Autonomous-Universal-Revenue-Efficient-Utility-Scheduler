@@ -1,0 +1,29 @@
+name: production-gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    environment: aureus-production-readiness
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify exact SHA
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Production remains evidence-driven
+        run: |
+          test -f config/aureus-policy.json
+          test -f docs/PRODUCTION_GATES.md
+          echo 'Repository engineering gate only. Runtime and economic evidence must be supplied independently.'

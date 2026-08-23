@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "external_execution_enabled": false,
+  "financial_execution_enabled": false,
+  "provider_write_enabled": false,
+  "automatic_kyc": false,
+  "automatic_contract_acceptance": false,
+  "automatic_hardware_purchase": false,
+  "automatic_capital_commitment": false,
+  "automatic_withdrawal": false,
+  "owned_or_authorized_compute_only": true,
+  "cryptojacking": false,
+  "minimum_telemetry_coverage_fraction": 0.95,
+  "gpu_board_only_power_is_insufficient": true,
+  "independent_external_settlement_required": true,
+  "minimum_positive_settlement_windows_for_production": 3,
+  "unresolved_attributable_costs_block_production": true
+}
