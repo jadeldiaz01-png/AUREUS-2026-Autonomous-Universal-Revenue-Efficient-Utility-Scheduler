@@ -1,5 +1,6 @@
-FROM python:3.12-slim@sha256:0d5d4d8f8b5f2f43b44a6c1db9ebdfe9e69b4acdbfba9f0b12b6c37eab4a47c8
+FROM python:3.12.14-slim-bookworm
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY pyproject.toml README.md ./
 COPY src ./src
 RUN pip install --no-cache-dir .
