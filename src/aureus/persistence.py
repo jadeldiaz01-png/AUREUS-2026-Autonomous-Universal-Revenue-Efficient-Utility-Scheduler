@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict
 from datetime import datetime
-from decimal import Decimal
 from typing import Any
 
 import psycopg
@@ -33,8 +31,14 @@ class PostgresStore:
                 """INSERT INTO external_settlement_evidence
                 (provider_reference,destination_reference_hash,amount_usd,received_at,verified,source_sha256)
                 VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT (provider_reference) DO NOTHING""",
-                (evidence.provider_reference, evidence.destination_reference_hash, evidence.amount_usd,
-                 evidence.received_at, evidence.verified, evidence.source_sha256),
+                (
+                    evidence.provider_reference,
+                    evidence.destination_reference_hash,
+                    evidence.amount_usd,
+                    evidence.received_at,
+                    evidence.verified,
+                    evidence.source_sha256,
+                ),
             )
 
     def persist_economic_proof(self, period_start: datetime, period_end: datetime, proof: EconomicProof) -> None:
@@ -44,8 +48,15 @@ class PostgresStore:
                 (period_start,period_end,externally_settled_usd,total_attributed_costs_usd,
                  verified_net_cash_settled_usd,proof_sha256,demonstrated)
                 VALUES (%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (proof_sha256) DO NOTHING""",
-                (period_start, period_end, proof.externally_settled_usd, proof.total_attributed_costs_usd,
-                 proof.verified_net_cash_settled_usd, proof.proof_sha256, proof.demonstrated),
+                (
+                    period_start,
+                    period_end,
+                    proof.externally_settled_usd,
+                    proof.total_attributed_costs_usd,
+                    proof.verified_net_cash_settled_usd,
+                    proof.proof_sha256,
+                    proof.demonstrated,
+                ),
             )
 
 
