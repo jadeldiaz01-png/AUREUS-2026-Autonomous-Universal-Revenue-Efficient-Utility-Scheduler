@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "component": "aureus-2026",
+  "decision": "CONDITIONAL",
+  "target": "PRODUCTION_GO",
+  "gates": {
+    "deterministic_policy": true,
+    "financial_execution_fail_closed": true,
+    "provider_write_fail_closed": true,
+    "human_approval_boundary": true,
+    "durable_intents": true,
+    "idempotency_and_reconciliation": true,
+    "external_settlement_evidence_model": true,
+    "postgresql_migrations_present": true,
+    "openbao_workload_identity_config_present": true,
+    "otel_collector_config_present": true,
+    "slo_documented": true,
+    "incident_security_process_documented": true,
+    "automated_tests": true,
+    "coverage_threshold_enforced": true,
+    "dependency_vulnerability_audit": true,
+    "secret_material_scan": true,
+    "immutable_workflow_actions": true,
+    "adversarial_authority_evals": true,
+    "protected_default_branch": false,
+    "verified_head_signature": true,
+    "runtime_postgresql_verified": false,
+    "pitr_restore_verified": false,
+    "workload_identity_runtime_verified": false,
+    "otlp_runtime_healthy": false,
+    "provider_observer_contract_verified": false,
+    "external_settlement_verified": false,
+    "complete_cost_attribution_verified": false,
+    "three_independent_positive_windows": false,
+    "artifact_provenance_attested": false
+  },
+  "blockers": [
+    {"owner": "human_admin", "id": "repository_governance", "reason": "Protect the default branch with required CI/status checks and signed promotion flow."},
+    {"owner": "human_admin", "id": "runtime_credentials", "reason": "Authorize runtime database, OpenBao identity and read-only provider credentials before operational certification."},
+    {"owner": "evidence", "id": "runtime_evidence", "reason": "Verify PostgreSQL, PITR restore, workload identity, OTLP health and provider observer contracts in the target runtime."},
+    {"owner": "evidence", "id": "economic_evidence", "reason": "Production GO requires authenticated external settlement, complete costs and at least three independent positive windows."}
+  ]
+}
