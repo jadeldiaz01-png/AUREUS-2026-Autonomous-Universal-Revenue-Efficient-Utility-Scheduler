@@ -42,7 +42,7 @@ def load_json(path: str) -> dict[str, Any]:
         return {}
     data = json.loads(p.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
-        raise RuntimeError(f"expected object in {path}")
+        raise TypeError(f"expected object in {path}")
     return data
 
 
@@ -74,12 +74,11 @@ def probe_postgres(database_url: str) -> dict[str, Any]:
             )
             cur.execute("insert into aureus_runtime_probe(id) values (%s)", (marker,))
         conn.commit()
-    with psycopg.connect(database_url, autocommit=True) as conn:
-        with conn.cursor() as cur:
-            cur.execute("select count(*) from aureus_runtime_probe where id=%s", (marker,))
-            result["durable_write_readback"] = cur.fetchone()[0] == 1
-            cur.execute("delete from aureus_runtime_probe where id=%s", (marker,))
-            result["schema_verified"] = True
+    with psycopg.connect(database_url, autocommit=True) as conn, conn.cursor() as cur:
+        cur.execute("select count(*) from aureus_runtime_probe where id=%s", (marker,))
+        result["durable_write_readback"] = cur.fetchone()[0] == 1
+        cur.execute("delete from aureus_runtime_probe where id=%s", (marker,))
+        result["schema_verified"] = True
     result["verified"] = bool(
         result["reachable"]
         and result["schema_verified"]
