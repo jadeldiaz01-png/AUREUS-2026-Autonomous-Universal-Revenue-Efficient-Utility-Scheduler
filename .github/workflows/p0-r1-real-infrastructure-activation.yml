@@ -11,9 +11,6 @@ on:
 permissions:
   contents: read
 
-environment:
-  name: aureus-production-runtime
-
 jobs:
   activate:
     runs-on: [self-hosted, linux, aureus-production-runtime]
