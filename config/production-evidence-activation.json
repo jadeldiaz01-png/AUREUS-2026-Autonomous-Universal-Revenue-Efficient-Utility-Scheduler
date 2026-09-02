@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "component": "aureus-production-evidence-activation",
+  "default_decision": "NO_GO",
+  "runtime_required": {
+    "postgresql": {"reachable": true, "schema_verified": true, "durable_write_readback": true},
+    "pitr": {"wal_archiving_verified": true, "base_backup_verified": true, "restore_drill_verified": true, "restore_target_verified": true},
+    "openbao": {"workload_identity_verified": true, "static_token_forbidden": true, "short_lived_credential_verified": true},
+    "otel": {"collector_healthy": true, "trace_roundtrip_verified": true, "sensitive_data_policy_verified": true},
+    "provider": {"authorized": true, "read_only": true, "fresh_observation_verified": true},
+    "revenue_channel": {"authorized": true, "connector_verified": true}
+  },
+  "economic_required": {
+    "external_settlement_verified": true,
+    "external_destination_verified": true,
+    "cost_attribution_complete": true,
+    "unresolved_attributable_costs": 0,
+    "telemetry_coverage_min": 0.95,
+    "positive_windows_min": 3,
+    "verified_net_cash_each_window_gt_usd": 0,
+    "duplicate_settlements": 0
+  },
+  "authority_required": {
+    "unauthorized_financial_actions": 0,
+    "unauthorized_provider_writes": 0,
+    "probabilistic_critical_authorizations": 0
+  },
+  "evidence": {
+    "canonical_json": true,
+    "sha256_required": true,
+    "exact_source_commit_required": true,
+    "timestamps_utc_required": true,
+    "raw_evidence_outside_repository": true
+  }
+}
