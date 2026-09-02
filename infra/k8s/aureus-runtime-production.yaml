@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aureus
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aureus-runtime
+  namespace: aureus
+automountServiceAccountToken: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aureus-runtime
+  namespace: aureus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aureus-runtime
+  template:
+    metadata:
+      labels:
+        app: aureus-runtime
+    spec:
+      serviceAccountName: aureus-runtime
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: runtime-secrets
+          emptyDir:
+            medium: Memory
+        - name: runtime-evidence
+          emptyDir: {}
+        - name: openbao-agent-config
+          configMap:
+            name: aureus-openbao-agent
+      containers:
+        - name: runtime
+          image: ghcr.io/OWNER/aureus-2026@sha256:REPLACE_WITH_SIGNED_DIGEST
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AUREUS_DATABASE_URL_FILE
+              value: /run/secrets/database_url
+            - name: AUREUS_PROVIDER_SECRET_FILE
+              value: /run/secrets/vast_api_key
+          volumeMounts:
+            - {name: runtime-secrets, mountPath: /run/secrets, readOnly: true}
+            - {name: runtime-evidence, mountPath: /run/evidence}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet: {path: /health/ready, port: 8000}
+            periodSeconds: 15
+          livenessProbe:
+            httpGet: {path: /health/live, port: 8000}
+            periodSeconds: 30
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: 500m, memory: 512Mi}
+        - name: openbao-agent
+          image: ghcr.io/openbao/openbao@sha256:REPLACE_WITH_OPENBAO_2_6_2_DIGEST
+          args: ["agent", "-config=/etc/openbao/agent.hcl"]
+          volumeMounts:
+            - {name: openbao-agent-config, mountPath: /etc/openbao, readOnly: true}
+            - {name: runtime-secrets, mountPath: /run/secrets}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 200m, memory: 256Mi}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aureus-runtime-default-deny
+  namespace: aureus
+spec:
+  podSelector:
+    matchLabels:
+      app: aureus-runtime
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - {protocol: TCP, port: 8000}
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - {protocol: TCP, port: 8200}
+        - {protocol: TCP, port: 4317}
+        - {protocol: TCP, port: 4318}
+        - {protocol: TCP, port: 5432}
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
