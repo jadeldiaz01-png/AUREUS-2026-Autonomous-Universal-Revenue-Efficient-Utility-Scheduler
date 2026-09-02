@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       expected_sha:
+        description: Exact commit SHA to certify
         required: true
         type: string
 
@@ -13,17 +14,39 @@ permissions:
 jobs:
   gate:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     environment: aureus-production-readiness
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ inputs.expected_sha }}
           persist-credentials: false
+          fetch-depth: 1
       - name: Verify exact SHA
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      - name: Production remains evidence-driven
+      - name: Materialize protected evidence bundle
+        env:
+          EVIDENCE_JSON: ${{ secrets.AUREUS_PRODUCTION_EVIDENCE_JSON }}
         run: |
-          test -f config/aureus-policy.json
-          test -f docs/PRODUCTION_GATES.md
-          echo 'Repository engineering gate only. Runtime and economic evidence must be supplied independently.'
+          set -euo pipefail
+          test -n "$EVIDENCE_JSON"
+          umask 077
+          printf '%s' "$EVIDENCE_JSON" > /tmp/aureus-production-evidence.json
+      - name: Certify runtime and economic evidence
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          python scripts/certify_production_evidence.py \
+            /tmp/aureus-production-evidence.json \
+            "$EXPECTED_SHA" \
+            /tmp/aureus-production-certificate.json
+          cat /tmp/aureus-production-certificate.json
+      - name: Remove raw evidence
+        if: always()
+        run: |
+          if test -f /tmp/aureus-production-evidence.json; then
+            shred -u /tmp/aureus-production-evidence.json || rm -f /tmp/aureus-production-evidence.json
+          fi
