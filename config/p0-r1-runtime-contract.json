@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "component": "aureus-p0-r1-real-infrastructure-activation",
+  "default_decision": "NO_GO",
+  "execution_location": "AUTHORIZED_SELF_HOSTED_RUNTIME",
+  "required_artifacts": [
+    "openbao.json",
+    "pitr.json",
+    "otel-roundtrip.json",
+    "provider.json",
+    "production-evidence.json"
+  ],
+  "artifact_policy": {
+    "raw_artifacts_must_not_be_committed": true,
+    "raw_artifacts_must_not_be_uploaded_from_public_repository": true,
+    "certificate_may_contain_only_hashes_and_non_secret_gate_results": true,
+    "all_timestamps_utc": true,
+    "source_commit_exact_match": true
+  },
+  "runtime_gates": {
+    "postgresql_durable_write_readback": true,
+    "postgresql_wal_level_replica_or_higher": true,
+    "postgresql_archive_mode_enabled": true,
+    "pitr_named_restore_point_drill": true,
+    "openbao_kubernetes_workload_identity": true,
+    "openbao_short_lived_token": true,
+    "static_openbao_tokens_forbidden": true,
+    "otlp_collector_health": true,
+    "otlp_trace_roundtrip": true,
+    "provider_authorized_read_only": true,
+    "provider_observation_fresh": true,
+    "revenue_channel_authorized": true,
+    "revenue_connector_verified": true
+  },
+  "economic_gates": {
+    "external_settlement_verified": true,
+    "external_destination_verified": true,
+    "cost_attribution_complete": true,
+    "unresolved_attributable_costs": 0,
+    "telemetry_coverage_min": 0.95,
+    "minimum_independent_positive_windows": 3,
+    "duplicate_settlements": 0
+  },
+  "authority_gates": {
+    "unauthorized_financial_actions": 0,
+    "unauthorized_provider_writes": 0,
+    "probabilistic_critical_authorizations": 0
+  },
+  "runner_requirements": {
+    "labels": ["self-hosted", "linux", "aureus-production-runtime"],
+    "ephemeral_preferred": true,
+    "clean_workspace_required": true,
+    "production_environment_approval_required": true,
+    "no_persistent_repository_credentials": true
+  }
+}

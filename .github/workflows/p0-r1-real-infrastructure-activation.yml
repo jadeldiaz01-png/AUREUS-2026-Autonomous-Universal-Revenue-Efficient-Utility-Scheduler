@@ -1,0 +1,90 @@
+name: p0-r1-real-infrastructure-activation
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact deployed AUREUS commit SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  activate:
+    runs-on: [self-hosted, linux, aureus-production-runtime]
+    timeout-minutes: 45
+    environment: aureus-production-runtime
+    concurrency:
+      group: aureus-p0-r1-production-runtime
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.expected_sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify exact deployed source SHA
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "${#EXPECTED_SHA}" -eq 40
+
+      - name: Verify isolated production runner prerequisites
+        run: |
+          set -euo pipefail
+          command -v python
+          command -v kubectl
+          command -v sha256sum
+          test -z "${OPENBAO_TOKEN:-}"
+          test -z "${VAULT_TOKEN:-}"
+          kubectl auth can-i get pods -n aureus
+          kubectl get namespace aureus >/dev/null
+
+      - name: Execute runtime evidence activation
+        env:
+          AUREUS_SOURCE_SHA: ${{ inputs.expected_sha }}
+          AUREUS_EVIDENCE_DIR: /run/evidence
+          AUREUS_DATABASE_URL_FILE: /run/secrets/database_url
+          AUREUS_PROVIDER_SECRET_FILE: /run/secrets/vast_api_key
+          AUREUS_OPENBAO_PROXY_URL: http://127.0.0.1:8100
+          AUREUS_OTEL_HEALTH_URL: http://otel-collector.aureus.svc:13133/
+          AUREUS_PROVIDER_HEALTH_URL: ${{ vars.AUREUS_PROVIDER_HEALTH_URL }}
+          AUREUS_REVENUE_CHANNEL_HEALTH_URL: ${{ vars.AUREUS_REVENUE_CHANNEL_HEALTH_URL }}
+        run: |
+          set -euo pipefail
+          bash scripts/p0_r1_activate.sh
+
+      - name: Publish non-secret certificate summary
+        if: success()
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/run/evidence/production-certificate.json')
+          d = json.loads(p.read_text())
+          allowed = {
+              'schema_version': d.get('schema_version'),
+              'source_commit_sha': d.get('source_commit_sha'),
+              'decision': d.get('decision'),
+              'runtime_verified': d.get('runtime_verified'),
+              'economically_verified': d.get('economically_verified'),
+              'certificate_sha256': d.get('certificate_sha256'),
+              'input_sha256': d.get('input_sha256'),
+              'blockers': d.get('blockers', []),
+          }
+          print(json.dumps(allowed, sort_keys=True))
+          PY
+
+      - name: Remove raw evidence from runner workspace boundary
+        if: always()
+        run: |
+          set -euo pipefail
+          if test -d /run/evidence; then
+            find /run/evidence -maxdepth 1 -type f -name '*.json' -exec sh -c 'shred -u "$1" 2>/dev/null || rm -f "$1"' _ {} \;
+          fi
