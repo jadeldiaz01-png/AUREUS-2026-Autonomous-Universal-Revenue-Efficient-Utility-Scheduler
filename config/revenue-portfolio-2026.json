@@ -1,18 +1,27 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "2.1.0",
   "portfolio": "AUREUS-2026 governed autonomous revenue",
   "objective": "maximize_verified_net_cash_settled",
   "channels": [
     {"id":"ai_integration_services","priority":1,"autonomy":"prepare_and_execute_when_platform_authorized","settlement_required":true,"capital_write":false},
     {"id":"ai_video_creator_services","priority":2,"autonomy":"prepare_and_execute_when_platform_authorized","settlement_required":true,"capital_write":false},
     {"id":"agent_api_microservices","priority":3,"autonomy":"publish_and_serve_when_authorized","settlement_required":true,"capital_write":false},
-    {"id":"mcp_commercial_marketplaces","priority":4,"autonomy":"publish_manage_offers_when_connector_authorized","settlement_required":true,"capital_write":false},
-    {"id":"data_knowledge_products","priority":5,"autonomy":"publish_and_deliver_when_rights_verified","settlement_required":true,"capital_write":false},
-    {"id":"open_source_sponsorships","priority":6,"autonomy":"maintain_profile_and_evidence","settlement_required":true,"capital_write":false},
-    {"id":"gpu_compute_revenue","priority":7,"autonomy":"observer_then_certified_limited_execution","settlement_required":true,"capital_write":false},
-    {"id":"authorized_bug_bounty","priority":8,"autonomy":"research_only_until_scope_authorized","settlement_required":true,"capital_write":false},
-    {"id":"agentic_machine_to_machine_services","priority":9,"autonomy":"experimental_seller_only","settlement_required":true,"capital_write":false,"protocols":["MCP","x402-compatible","AP2-compatible"]}
+    {"id":"ai_traffic_content_monetization","priority":4,"autonomy":"seller_side_meter_price_and_serve_when_rights_verified","settlement_required":true,"capital_write":false,"protocols":["HTTP-402","x402-compatible"]},
+    {"id":"mcp_commercial_marketplaces","priority":5,"autonomy":"publish_manage_offers_when_connector_authorized","settlement_required":true,"capital_write":false},
+    {"id":"data_knowledge_products","priority":6,"autonomy":"publish_and_deliver_when_rights_verified","settlement_required":true,"capital_write":false},
+    {"id":"open_source_sponsorships","priority":7,"autonomy":"maintain_profile_and_evidence","settlement_required":true,"capital_write":false},
+    {"id":"gpu_compute_revenue","priority":8,"autonomy":"observer_then_certified_limited_execution","settlement_required":true,"capital_write":false},
+    {"id":"authorized_bug_bounty","priority":9,"autonomy":"research_only_until_scope_authorized","settlement_required":true,"capital_write":false},
+    {"id":"agentic_machine_to_machine_services","priority":10,"autonomy":"experimental_seller_only","settlement_required":true,"capital_write":false,"protocols":["MCP","x402-compatible","AP2-compatible","MPP-compatible"]}
   ],
+  "agentic_payment_policy": {
+    "seller_side_receipt_allowed_after_runtime_certification": true,
+    "autonomous_buyer_payments": false,
+    "wallet_private_keys_visible_to_llm": false,
+    "session_spend_limit_required_if_buyer_mode_is_ever_enabled": true,
+    "payment_observability_required": true,
+    "settlement_reconciliation_required": true
+  },
   "compounding": {
     "enabled": true,
     "basis": "verified_net_cash_settled_only",
