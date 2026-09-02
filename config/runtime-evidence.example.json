@@ -1,0 +1,35 @@
+{
+  "openbao": {
+    "workload_identity_verified": false,
+    "static_token_forbidden": true,
+    "short_lived_credential_verified": false
+  },
+  "pitr": {
+    "wal_archiving_verified": false,
+    "base_backup_verified": false,
+    "restore_drill_verified": false,
+    "restore_target_verified": false
+  },
+  "otel_roundtrip": {
+    "verified": false,
+    "sensitive_data_policy_verified": false
+  },
+  "provider": {
+    "authorized": false,
+    "read_only": true,
+    "fresh_observation_verified": false
+  },
+  "revenue_channel": {
+    "authorized": false,
+    "connector_verified": false
+  },
+  "economics": {
+    "external_settlement_verified": false,
+    "external_destination_verified": false,
+    "cost_attribution_complete": false,
+    "unresolved_attributable_costs": 0,
+    "telemetry_coverage": 0,
+    "duplicate_settlements": 0,
+    "windows": []
+  }
+}

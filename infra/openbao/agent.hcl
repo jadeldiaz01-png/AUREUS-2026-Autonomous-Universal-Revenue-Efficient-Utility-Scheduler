@@ -1,8 +1,29 @@
+vault {
+  address = "https://openbao.openbao.svc:8200"
+  retry {
+    num_retries = 10
+  }
+}
+
 auto_auth {
   method "kubernetes" {
     mount_path = "auth/kubernetes"
-    config = { role = "aureus-runtime-observer" }
+    config = {
+      role = "aureus-runtime-observer"
+      token_path = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    }
   }
+}
+
+# Local-only proxy: requests are authenticated with the renewable Auto-Auth token.
+# The application never receives or stores a static OpenBao token.
+api_proxy {
+  use_auto_auth_token = "force"
+}
+
+listener "tcp" {
+  address = "127.0.0.1:8100"
+  tls_disable = true
 }
 
 template {

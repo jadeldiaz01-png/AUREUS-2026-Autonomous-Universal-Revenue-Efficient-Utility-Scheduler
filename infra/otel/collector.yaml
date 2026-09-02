@@ -1,3 +1,10 @@
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  file_storage:
+    directory: /var/lib/otelcol/storage
+    create_directory: true
+
 receivers:
   otlp:
     protocols:
@@ -5,21 +12,39 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+
 processors:
   memory_limiter:
     check_interval: 1s
     limit_mib: 256
-  batch: {}
+    spike_limit_mib: 64
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
 exporters:
-  debug:
-    verbosity: basic
+  otlphttp/runtime_backend:
+    endpoint: ${env:AUREUS_OTEL_EXPORT_ENDPOINT}
+    sending_queue:
+      enabled: true
+      storage: file_storage
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
 service:
+  extensions: [health_check, file_storage]
+  telemetry:
+    logs:
+      level: info
   pipelines:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [debug]
+      exporters: [otlphttp/runtime_backend]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [debug]
+      exporters: [otlphttp/runtime_backend]
