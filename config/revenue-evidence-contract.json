@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "metric": "VERIFIED_NET_CASH_SETTLED",
+  "required_for_every_channel": [
+    "authorized_channel_identity",
+    "offer_or_work_reference",
+    "delivery_or_usage_evidence",
+    "external_settlement_reference",
+    "external_destination_verified",
+    "attributable_costs_complete",
+    "canonical_evidence_hash"
+  ],
+  "never_count_as_cash": [
+    "proposal_value",
+    "invoice_only",
+    "platform_balance_only",
+    "pending_withdrawal",
+    "advertised_reward",
+    "token_emission_without_external_settlement",
+    "simulated_pnl",
+    "credits_or_promotional_balance"
+  ],
+  "production_window": {
+    "minimum_independent_positive_windows": 3,
+    "minimum_telemetry_coverage": 0.95,
+    "unresolved_attributable_costs_max": 0,
+    "duplicate_settlement_references_max": 0
+  },
+  "compounding_eligibility": {
+    "source": "VERIFIED_NET_CASH_SETTLED",
+    "requires_reconciliation": true,
+    "requires_positive_net": true,
+    "pending_or_unverified_cash_eligible": false
+  }
+}

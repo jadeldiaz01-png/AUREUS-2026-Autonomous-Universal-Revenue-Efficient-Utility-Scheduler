@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "supervisor": "RevenueSupervisorAgent",
   "agents": [
     "GlobalDiscoveryAgent",
@@ -11,6 +11,11 @@
     "HardwareProfilerAgent",
     "MarketIntelligenceAgent",
     "EconomicsAgent",
+    "RevenuePortfolioAgent",
+    "ProductizationAgent",
+    "AgenticCommerceAgent",
+    "SettlementRailAgent",
+    "CapitalAllocatorAgent",
     "AllocationAgent",
     "DynamicPricingAgent",
     "DeepLearningForecastAgent",
@@ -23,5 +28,24 @@
     "PolicyAgent",
     "HumanApprovalAgent"
   ],
-  "probabilistic_agents_may_authorize_critical_actions": false
+  "authority": {
+    "probabilistic_agents_may_authorize_critical_actions": false,
+    "settlement_agents_are_read_only_by_default": true,
+    "new_capital_commitment_requires_human_approval": true,
+    "new_contract_or_kyc_requires_human_approval": true,
+    "unbounded_self_replication": false,
+    "unbounded_financial_execution": false
+  },
+  "handoff_order": [
+    "discover",
+    "due_diligence",
+    "economics",
+    "portfolio_rank",
+    "policy_and_risk",
+    "human_approval_if_required",
+    "execute_authorized_work",
+    "reconcile_external_settlement",
+    "attribute_costs",
+    "compound_verified_profit"
+  ]
 }
