@@ -37,12 +37,11 @@ def seed(database_url: str, output: Path) -> None:
 
 def verify(restored_database_url: str, seed_file: Path, output: Path) -> None:
     seed_data = json.loads(seed_file.read_text(encoding="utf-8"))
-    with psycopg.connect(restored_database_url, autocommit=True) as conn:
-        with conn.cursor() as cur:
-            cur.execute("select count(*) from aureus_pitr_probe where id=%s", (seed_data["before_id"],))
-            before_present = cur.fetchone()[0] == 1
-            cur.execute("select count(*) from aureus_pitr_probe where id=%s", (seed_data["after_id"],))
-            after_absent = cur.fetchone()[0] == 0
+    with psycopg.connect(restored_database_url, autocommit=True) as conn, conn.cursor() as cur:
+        cur.execute("select count(*) from aureus_pitr_probe where id=%s", (seed_data["before_id"],))
+        before_present = cur.fetchone()[0] == 1
+        cur.execute("select count(*) from aureus_pitr_probe where id=%s", (seed_data["after_id"],))
+        after_absent = cur.fetchone()[0] == 0
     verified = before_present and after_absent
     payload = {
         "wal_archiving_verified": verified,
